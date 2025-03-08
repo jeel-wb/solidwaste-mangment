@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Solid Waste Management Game</title>
+    <style>
+        .logo {
+            position: fixed; /* Change to fixed to keep it in place */
+            top: 0;
+            left: 0;
+            width: 100%; /* Full width */
+            height: 100%; /* Full height */
+            object-fit: cover; /* Cover the entire area */
+            z-index: -1; /* Keep it behind other content */
+        }
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f0f0f0;
+            text-align: center;
+        }
+        
+        .game-container {
+            margin: 20px auto;
+            width: 300px;
+        }
+        
+        .garbage {
+            font-size: 50px;
+            margin: 10px;
+            cursor: grab;
+        }
+        
+        .dustbins {
+            display: flex;
+            justify-content: space-between;
+        }
+        
+        .dustbin {
+            width: 60px;
+            height: 100px;
+            border: 2px dashed #ccc;
+            border-radius: 5px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .dustbin1 {
+            background-color: green;
+        }
+        .dustbin2 {
+            background-color: yellow;
+        }
+        .dustbin3 {
+            background-color: red;
+        }
+        .dustbin4 {
+            background-color: white;
+        }
+        
+        .dustbin:hover {
+            background-color: #e0e0e0;
+        }
+        
+        .dustbin.over {
+            border-color: #000;
+        }
+        
+        .score {
+            font-size: 20px;
+            margin-bottom: 10px;
+        }
+        .bun {
+            margin-left: 50%;
+        }
+    </style>
+</head>
+<body>
+    <video class="logo" autoplay loop muted>
+        <source src="s.mp4">
+    </video>
+    <h1>Solid Waste Management Game</h1>
+    <div class="score">Score: <span id="score">0</span></div>
+    <div class="game-container">
+        <div class="garbage" draggable="true" id="current-garbage"></div>
+        <div class="dustbins">
+            <div class="dustbin dustbin1" id="organic">Organic</div>
+            <div class="dustbin dustbin2" id="recyclable">Recyclable</div>
+            <div class="dustbin dustbin3" id="hazardous">Hazardous</div>
+            <div class="dustbin dustbin4" id="general">General Waste</div>
+        </div>
+    </div>
+    <button id="restart" style="display: none;" class="bun">Restart Game</button>
+    <script>
+        const dustbins = document.querySelectorAll('.dustbin');
+        const scoreDisplay = document.getElementById('score');
+        const restartButton = document.getElementById('restart');
+        const currentGarbage = document.getElementById('current-garbage');
+
+        let score = 0;
+        let gameActive = true;
+
+        // Define garbage items and their corresponding dustbins
+        const garbageItems = [
+            { id: 'banana', emoji: '🍌', type: 'organic' },
+            { id: 'plastic-bottle', emoji: '🧴', type: 'recyclable' },
+            { id: 'battery', emoji: '🔋', type: 'hazardous' },
+            { id: 'paper', emoji: '📄', type: 'recyclable' },
+            { id: 'apple', emoji: '🍏', type: 'organic' },
+            { id: 'glass', emoji: '🍷', type: 'recyclable' },
+            { id: 'can', emoji: '🥫', type: 'recyclable' },
+            { id: 'old-shoe', emoji: '👟', type: 'general' },
+            { id: 'food-wrapper', emoji: '🍔', type: 'general' },
+            { id: 'newspaper', emoji: '📰', type: 'recyclable' },
+            { id: 'light-bulb', emoji: '💡', type: 'hazardous' },
+            { id: 'cigarette', emoji: '🚬', type: 'general' },
+            { id: 'styrofoam', emoji: '☕', type: 'general' },
+            { id: 'diaper', emoji: '🍼', type: 'general' },
+            { id: 'metal-scrap', emoji: '🔩', type: 'recyclable' },
+            { id: 'plastic-bag', emoji: '🛍️', type: 'recyclable' }
+        ];
+
+        let currentItemIndex = 0;
+
+        // Function to show the current garbage item
+        function showCurrentGarbage() {
+            if (currentItemIndex < garbageItems.length) {
+                currentGarbage.textContent = garbageItems[currentItemIndex].emoji;
+                currentGarbage.dataset.type = garbageItems[currentItemIndex].type;
+            } else {
+                alert('Game Over! Your final score is: ' + score);
+                gameActive = false;
+                restartButton.style.display = 'block';
+            }
+        }
+
+        // Initialize the game
+        showCurrentGarbage();
+
+        // Drag and drop functionality
+        currentGarbage.addEventListener('dragstart', (e) => {
+            e.dataTransfer.setData('text/plain', currentGarbage.dataset.type);
+        });
+
+        dustbins.forEach(dustbin => {
+            dustbin.addEventListener('dragover', (e) => {
+                e.preventDefault();
+                dustbin.classList.add('over');
+            });
+
+            dustbin.addEventListener('dragleave', () => {
+                dustbin.classList.remove('over');
+            });
+
+            dustbin.addEventListener('drop', (e) => {
+                e.preventDefault();
+                const droppedType = e.dataTransfer.getData('text/plain');
+
+                if (gameActive) {
+                    if (droppedType === dustbin.id) {
+                        score++;
+                        scoreDisplay.textContent = score;
+                        alert('Correct! This is ' + dustbin.id + ' waste.');
+                        currentItemIndex++;
+                        showCurrentGarbage();
+                    } else {
+                        alert('Incorrect! Game Over.');
+                        gameActive = false;
+                        restartButton.style.display = 'block';
+                    }
+                }
+
+                dustbin.classList.remove('over');
+            });
+        });
+
+        restartButton.addEventListener('click', () => {
+            score = 0;
+            scoreDisplay.textContent = score;
+            gameActive = true;
+            restartButton.style.display = 'none';
+            currentItemIndex = 0;
+            showCurrentGarbage();
+        });
+    </script>
+</body>
+</html>
