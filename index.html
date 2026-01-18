@@ -1,188 +1,281 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Solid Waste Management Game</title>
-    <style>
-        .logo {
-            position: fixed; /* Change to fixed to keep it in place */
-            top: 0;
-            left: 0;
-            width: 100%; /* Full width */
-            height: 100%; /* Full height */
-            object-fit: cover; /* Cover the entire area */
-            z-index: -1; /* Keep it behind other content */
-        }
-        body {
-            font-family: Arial, sans-serif;
-            background-color: #f0f0f0;
-            text-align: center;
-        }
-        
-        .game-container {
-            margin: 20px auto;
-            width: 300px;
-        }
-        
-        .garbage {
-            font-size: 50px;
-            margin: 10px;
-            cursor: grab;
-        }
-        
-        .dustbins {
-            display: flex;
-            justify-content: space-between;
-        }
-        
-        .dustbin {
-            width: 60px;
-            height: 100px;
-            border: 2px dashed #ccc;
-            border-radius: 5px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-        
-        .dustbin1 {
-            background-color: green;
-        }
-        .dustbin2 {
-            background-color: yellow;
-        }
-        .dustbin3 {
-            background-color: red;
-        }
-        .dustbin4 {
-            background-color: white;
-        }
-        
-        .dustbin:hover {
-            background-color: #e0e0e0;
-        }
-        
-        .dustbin.over {
-            border-color: #000;
-        }
-        
-        .score {
-            font-size: 20px;
-            margin-bottom: 10px;
-        }
-        .bun {
-            margin-left: 50%;
-        }
-    </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Solid Waste – Eco Sort Game</title>
+<meta name="description" content="Play Solid Waste Eco Sort Game: Learn to segregate garbage into Organic, Recyclable, Hazardous, and General bins. Fun, educational, and eco-friendly!">
+<meta name="keywords" content="Solid Waste, Garbage Segregation, Eco Game, Recycling Game, Eco Education, Waste Management">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<style>
+body{
+ margin:0;
+ font-family:Segoe UI;
+ background:#020617;
+ color:#fff;
+ display:flex;
+ justify-content:center;
+ align-items:flex-start;
+ min-height:100vh;
+ padding:20px;
+}
+.app{
+ width:95%;
+ max-width:1000px;
+ background:rgba(255,255,255,.08);
+ backdrop-filter:blur(14px);
+ border-radius:22px;
+ padding:20px;
+ text-align:center;
+}
+h1,h2{margin-bottom:15px;}
+input, button{
+ margin-top:10px;
+ padding:10px 25px;
+ border:none;
+ border-radius:30px;
+ font-weight:bold;
+}
+button{background:#22c55e;color:#020617;cursor:pointer;}
+input{text-align:center;}
+.top{
+ display:flex;
+ justify-content:space-between;
+ flex-wrap:wrap;
+ gap:10px;
+ margin-bottom:10px;
+}
+.badge{
+ background:#00000070;
+ padding:8px 18px;
+ border-radius:30px;
+ border:1px solid #22c55e;
+ font-weight:600;
+}
+.item{
+ margin:20px auto;
+ width:130px;
+ height:130px;
+ border-radius:50%;
+ background:radial-gradient(circle,#ffffff30,#00000070);
+ display:flex;
+ justify-content:center;
+ align-items:center;
+ font-size:70px;
+ cursor:pointer;
+}
+.item.active{box-shadow:0 0 30px #22c55e;}
+.bins{
+ display:grid;
+ grid-template-columns:repeat(2,1fr);
+ gap:15px;
+ margin-bottom:10px;
+}
+@media(min-width:600px){.bins{grid-template-columns:repeat(4,1fr);}}
+.bin{
+ height:140px;
+ border-radius:14px;
+ cursor:pointer;
+ display:flex;
+ align-items:flex-end;
+ justify-content:center;
+ font-weight:bold;
+}
+.bin span{
+ background:#00000060;
+ width:100%;
+ padding:6px;
+ border-radius:0 0 14px 14px;
+}
+.organic{background:linear-gradient(#22c55e,#14532d);}
+.recycle{background:linear-gradient(#3b82f6,#1e3a8a);}
+.hazard{background:linear-gradient(#ef4444,#7f1d1d);}
+.general{background:linear-gradient(#9ca3af,#374151);}
+.correct{box-shadow:0 0 25px #22c55e;}
+.wrong{box-shadow:0 0 25px #ef4444;}
+.msg{text-align:center;margin-top:10px;font-weight:bold;}
+table{
+ width:100%;
+ margin-top:15px;
+ border-collapse:collapse;
+}
+th,td{padding:8px;border-bottom:1px solid #ffffff30;text-align:center;}
+</style>
 </head>
+
 <body>
-    <video class="logo" autoplay loop muted>
-        <source src="s.mp4">
-    </video>
-    <h1>Solid Waste Management Game</h1>
-    <div class="score">Score: <span id="score">0</span></div>
-    <div class="game-container">
-        <div class="garbage" draggable="true" id="current-garbage"></div>
-        <div class="dustbins">
-            <div class="dustbin dustbin1" id="organic">Organic</div>
-            <div class="dustbin dustbin2" id="recyclable">Recyclable</div>
-            <div class="dustbin dustbin3" id="hazardous">Hazardous</div>
-            <div class="dustbin dustbin4" id="general">General Waste</div>
-        </div>
-    </div>
-    <button id="restart" style="display: none;" class="bun">Restart Game</button>
-    <script>
-        const dustbins = document.querySelectorAll('.dustbin');
-        const scoreDisplay = document.getElementById('score');
-        const restartButton = document.getElementById('restart');
-        const currentGarbage = document.getElementById('current-garbage');
+<div class="app">
+<h1>Solid Waste – Eco Sort Game</h1>
 
-        let score = 0;
-        let gameActive = true;
+<!-- NAME INPUT SCREEN -->
+<div id="nameScreen">
+ <h2>Enter your name / તમારું નામ / अपना नाम</h2>
+ <input id="playerName" placeholder="Your Name" maxlength="15">
+ <br>
+ <button id="startBtn">Start Game</button>
+</div>
 
-        // Define garbage items and their corresponding dustbins
-        const garbageItems = [
-            { id: 'banana', emoji: '🍌', type: 'organic' },
-            { id: 'plastic-bottle', emoji: '🧴', type: 'recyclable' },
-            { id: 'battery', emoji: '🔋', type: 'hazardous' },
-            { id: 'paper', emoji: '📄', type: 'recyclable' },
-            { id: 'apple', emoji: '🍏', type: 'organic' },
-            { id: 'glass', emoji: '🍷', type: 'recyclable' },
-            { id: 'can', emoji: '🥫', type: 'recyclable' },
-            { id: 'old-shoe', emoji: '👟', type: 'general' },
-            { id: 'food-wrapper', emoji: '🍔', type: 'general' },
-            { id: 'newspaper', emoji: '📰', type: 'recyclable' },
-            { id: 'light-bulb', emoji: '💡', type: 'hazardous' },
-            { id: 'cigarette', emoji: '🚬', type: 'general' },
-            { id: 'styrofoam', emoji: '☕', type: 'general' },
-            { id: 'diaper', emoji: '🍼', type: 'general' },
-            { id: 'metal-scrap', emoji: '🔩', type: 'recyclable' },
-            { id: 'plastic-bag', emoji: '🛍️', type: 'recyclable' }
-        ];
+<!-- GAME SCREEN -->
+<div id="gameScreen" style="display:none;">
+ <div class="top">
+  <div class="badge">Score: <span id="score">0</span></div>
+  <div class="badge">Level: <span id="level">1</span></div>
+  <div class="badge">⏱️ <span id="time">10</span>s</div>
+ </div>
 
-        let currentItemIndex = 0;
+ <p>Tap item → Tap bin</p>
+ <div id="item" class="item"></div>
 
-        // Function to show the current garbage item
-        function showCurrentGarbage() {
-            if (currentItemIndex < garbageItems.length) {
-                currentGarbage.textContent = garbageItems[currentItemIndex].emoji;
-                currentGarbage.dataset.type = garbageItems[currentItemIndex].type;
-            } else {
-                alert('Game Over! Your final score is: ' + score);
-                gameActive = false;
-                restartButton.style.display = 'block';
-            }
-        }
+ <div class="bins">
+  <div class="bin organic" data-type="organic"><span>ORGANIC</span></div>
+  <div class="bin recycle" data-type="recycle"><span>RECYCLE</span></div>
+  <div class="bin hazard" data-type="hazard"><span>HAZARD</span></div>
+  <div class="bin general" data-type="general"><span>GENERAL</span></div>
+ </div>
 
-        // Initialize the game
-        showCurrentGarbage();
+ <div class="msg" id="msg"></div>
+ <button id="restart" style="display:none;">Restart Game</button>
+ <button id="pdf" style="display:none;">Download Certificate (PDF)</button>
+</div>
 
-        // Drag and drop functionality
-        currentGarbage.addEventListener('dragstart', (e) => {
-            e.dataTransfer.setData('text/plain', currentGarbage.dataset.type);
-        });
+<h3>🏆 Leaderboard</h3>
+<table>
+<thead>
+<tr><th>#</th><th>Name</th><th>Score</th><th>Level</th><th>Date</th></tr>
+</thead>
+<tbody id="board"></tbody>
+</table>
+</div>
 
-        dustbins.forEach(dustbin => {
-            dustbin.addEventListener('dragover', (e) => {
-                e.preventDefault();
-                dustbin.classList.add('over');
-            });
+<script>
+/* ---------- VARIABLES ---------- */
+let items=[
+ {e:'🍎',t:'organic'},{e:'🍌',t:'organic'},{e:'🥬',t:'organic'},{e:'🍞',t:'organic'},{e:'🍉',t:'organic'},
+ {e:'🧴',t:'recycle'},{e:'📰',t:'recycle'},{e:'📦',t:'recycle'},{e:'🥫',t:'recycle'},{e:'🍾',t:'recycle'},
+ {e:'🔋',t:'hazard'},{e:'💡',t:'hazard'},{e:'🧪',t:'hazard'},{e:'💊',t:'hazard'},
+ {e:'🥤',t:'general'},{e:'🚬',t:'general'},{e:'🍕',t:'general'},{e:'🧻',t:'general'}
+];
+let index=0,score=0,level=1,time=10,selected=false,timer;
+let playerName="";
 
-            dustbin.addEventListener('dragleave', () => {
-                dustbin.classList.remove('over');
-            });
+/* ---------- ELEMENTS ---------- */
+const nameScreen=document.getElementById("nameScreen");
+const gameScreen=document.getElementById("gameScreen");
+const startBtn=document.getElementById("startBtn");
+const nameInput=document.getElementById("playerName");
+const item=document.getElementById("item");
+const scoreEl=document.getElementById("score");
+const levelEl=document.getElementById("level");
+const timeEl=document.getElementById("time");
+const msg=document.getElementById("msg");
+const restart=document.getElementById("restart");
+const pdfBtn=document.getElementById("pdf");
+const board=document.getElementById("board");
 
-            dustbin.addEventListener('drop', (e) => {
-                e.preventDefault();
-                const droppedType = e.dataTransfer.getData('text/plain');
+/* ---------- FUNCTIONS ---------- */
+function shuffle(a){for(let i=a.length-1;i>0;i--){let j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]];}}
+shuffle(items);
 
-                if (gameActive) {
-                    if (droppedType === dustbin.id) {
-                        score++;
-                        scoreDisplay.textContent = score;
-                        alert('Correct! This is ' + dustbin.id + ' waste.');
-                        currentItemIndex++;
-                        showCurrentGarbage();
-                    } else {
-                        alert('Incorrect! Game Over.');
-                        gameActive = false;
-                        restartButton.style.display = 'block';
-                    }
-                }
+function levelTime(){return Math.max(10-(level-1)*2,4);}
 
-                dustbin.classList.remove('over');
-            });
-        });
+function startGame(){
+ nameScreen.style.display="none";
+ gameScreen.style.display="block";
+ playerName=nameInput.value||"Player";
+ index=0; score=0; level=1;
+ scoreEl.textContent=score;
+ levelEl.textContent=level;
+ nextItem();
+}
 
-        restartButton.addEventListener('click', () => {
-            score = 0;
-            scoreDisplay.textContent = score;
-            gameActive = true;
-            restartButton.style.display = 'none';
-            currentItemIndex = 0;
-            showCurrentGarbage();
-        });
-    </script>
+function nextItem(){
+ item.textContent=items[index].e;
+ item.dataset.type=items[index].t;
+ time=levelTime();
+ timeEl.textContent=time;
+ clearInterval(timer);
+ timer=setInterval(()=>{
+  time--;
+  timeEl.textContent=time;
+  if(time<=0) gameOver();
+ },1000);
+}
+
+item.onclick=()=>{selected=!selected; item.classList.toggle("active");};
+
+document.querySelectorAll(".bin").forEach(bin=>{
+ bin.onclick=()=>{
+  if(!selected) return;
+  clearInterval(timer);
+  if(bin.dataset.type===item.dataset.type){
+   score+=10;
+   if(score%50===0) level++;
+   scoreEl.textContent=score;
+   levelEl.textContent=level;
+   msg.textContent="✅ Correct!";
+   index++;
+   if(index<items.length) nextItem();
+   else winGame();
+  }else{
+   msg.textContent="❌ Wrong bin!";
+  }
+  selected=false; item.classList.remove("active");
+ };
+});
+
+function gameOver(){
+ clearInterval(timer);
+ msg.textContent="⛔ Game Over!";
+ finishGame();
+}
+
+function winGame(){
+ clearInterval(timer);
+ msg.textContent="🏆 Game Complete!";
+ finishGame();
+}
+
+function finishGame(){
+ item.style.display="none";
+ restart.style.display="inline-block";
+ pdfBtn.style.display="inline-block";
+ saveScore();
+ loadBoard();
+}
+
+/* ---------- Leaderboard ---------- */
+function saveScore(){
+ const data=JSON.parse(localStorage.getItem("ecoBoard")||"[]");
+ data.push({name:playerName,score,level,date:new Date().toLocaleDateString()});
+ data.sort((a,b)=>b.score-a.score);
+ localStorage.setItem("ecoBoard",JSON.stringify(data.slice(0,5)));
+}
+function loadBoard(){
+ board.innerHTML="";
+ const data=JSON.parse(localStorage.getItem("ecoBoard")||"[]");
+ data.forEach((d,i)=>board.innerHTML+=`<tr><td>${i+1}</td><td>${d.name}</td><td>${d.score}</td><td>${d.level}</td><td>${d.date}</td></tr>`);
+}
+
+/* ---------- PDF Certificate ---------- */
+pdfBtn.onclick=()=>{
+ const { jsPDF } = window.jspdf;
+ const doc=new jsPDF();
+ doc.setFontSize(22);
+ doc.text("Solid Waste – Eco Sort Game Certificate",20,40);
+ doc.setFontSize(16);
+ doc.text(`Name: ${playerName}`,20,60);
+ doc.text(`Score: ${score}`,20,75);
+ doc.text(`Level: ${level}`,20,90);
+ doc.text(`Date: ${new Date().toLocaleDateString()}`,20,105);
+ doc.text("Congratulations! 🎉",20,125);
+ doc.save("Eco-Sort-Certificate.pdf");
+}
+
+/* ---------- START BUTTON ---------- */
+startBtn.onclick=startGame;
+restart.onclick=()=>location.reload();
+
+loadBoard();
+</script>
 </body>
 </html>
