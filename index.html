@@ -4,138 +4,161 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Solid Waste – Eco Sort Game</title>
-<meta name="description" content="Play Solid Waste Eco Sort Game: Learn to segregate garbage into Organic, Recyclable, Hazardous, and General bins. Fun, educational, and eco-friendly!">
-<meta name="keywords" content="Solid Waste, Garbage Segregation, Eco Game, Recycling Game, Eco Education, Waste Management">
+
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+
 <style>
+/* ---------- GLOBAL ---------- */
 body{
- margin:0;
- font-family:Segoe UI;
- background:#020617;
- color:#fff;
- display:flex;
- justify-content:center;
- align-items:flex-start;
- min-height:100vh;
- padding:20px;
+  margin:0;
+  font-family:Segoe UI, sans-serif;
+  background:#020617;
+  color:#fff;
+  min-height:100vh;
+  padding:15px;
+  overflow-y:auto; /* ✅ SCROLL FIX */
 }
+
 .app{
- width:95%;
- max-width:1000px;
- background:rgba(255,255,255,.08);
- backdrop-filter:blur(14px);
- border-radius:22px;
- padding:20px;
- text-align:center;
+  width:100%;
+  max-width:1000px;
+  margin:auto;
+  background:rgba(255,255,255,.08);
+  backdrop-filter:blur(14px);
+  border-radius:22px;
+  padding:20px;
+  text-align:center;
 }
-h1,h2{margin-bottom:15px;}
-input, button{
- margin-top:10px;
- padding:10px 25px;
- border:none;
- border-radius:30px;
- font-weight:bold;
+
+/* ---------- UI ---------- */
+h1,h2{margin-bottom:12px;}
+input,button{
+  padding:10px 25px;
+  border:none;
+  border-radius:30px;
+  font-weight:bold;
+  margin-top:10px;
 }
 button{background:#22c55e;color:#020617;cursor:pointer;}
-input{text-align:center;}
+input{text-align:center;width:80%;max-width:300px;}
+
 .top{
- display:flex;
- justify-content:space-between;
- flex-wrap:wrap;
- gap:10px;
- margin-bottom:10px;
+  display:flex;
+  gap:10px;
+  justify-content:space-between;
+  flex-wrap:wrap;
+  margin-bottom:10px;
 }
 .badge{
- background:#00000070;
- padding:8px 18px;
- border-radius:30px;
- border:1px solid #22c55e;
- font-weight:600;
+  background:#00000070;
+  padding:8px 18px;
+  border-radius:30px;
+  border:1px solid #22c55e;
+  font-weight:600;
 }
+
+/* ---------- ITEM ---------- */
 .item{
- margin:20px auto;
- width:130px;
- height:130px;
- border-radius:50%;
- background:radial-gradient(circle,#ffffff30,#00000070);
- display:flex;
- justify-content:center;
- align-items:center;
- font-size:70px;
- cursor:pointer;
+  margin:20px auto;
+  width:120px;
+  height:120px;
+  border-radius:50%;
+  background:radial-gradient(circle,#ffffff30,#00000070);
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  font-size:65px;
+  cursor:pointer;
 }
-.item.active{box-shadow:0 0 30px #22c55e;}
+.item.active{box-shadow:0 0 25px #22c55e;}
+
+/* ---------- BINS ---------- */
 .bins{
- display:grid;
- grid-template-columns:repeat(2,1fr);
- gap:15px;
- margin-bottom:10px;
+  display:grid;
+  grid-template-columns:repeat(2,1fr);
+  gap:15px;
 }
-@media(min-width:600px){.bins{grid-template-columns:repeat(4,1fr);}}
+@media(min-width:600px){
+  .bins{grid-template-columns:repeat(4,1fr);}
+}
 .bin{
- height:140px;
- border-radius:14px;
- cursor:pointer;
- display:flex;
- align-items:flex-end;
- justify-content:center;
- font-weight:bold;
+  height:130px;
+  border-radius:14px;
+  display:flex;
+  align-items:flex-end;
+  justify-content:center;
+  font-weight:bold;
+  cursor:pointer;
 }
 .bin span{
- background:#00000060;
- width:100%;
- padding:6px;
- border-radius:0 0 14px 14px;
+  width:100%;
+  background:#00000070;
+  padding:6px;
+  border-radius:0 0 14px 14px;
 }
+
 .organic{background:linear-gradient(#22c55e,#14532d);}
 .recycle{background:linear-gradient(#3b82f6,#1e3a8a);}
 .hazard{background:linear-gradient(#ef4444,#7f1d1d);}
 .general{background:linear-gradient(#9ca3af,#374151);}
-.correct{box-shadow:0 0 25px #22c55e;}
-.wrong{box-shadow:0 0 25px #ef4444;}
-.msg{text-align:center;margin-top:10px;font-weight:bold;}
+
+.msg{margin:10px;font-weight:bold;}
+
+/* ---------- LEADERBOARD ---------- */
 table{
- width:100%;
- margin-top:15px;
- border-collapse:collapse;
+  width:100%;
+  margin-top:15px;
+  border-collapse:collapse;
+  display:block;
+  max-height:280px; /* ✅ mobile scroll */
+  overflow-y:auto;
 }
-th,td{padding:8px;border-bottom:1px solid #ffffff30;text-align:center;}
+thead,tbody{
+  display:table;
+  width:100%;
+}
+th,td{
+  padding:8px;
+  border-bottom:1px solid #ffffff30;
+}
 </style>
 </head>
 
 <body>
 <div class="app">
+
 <h1>Solid Waste – Eco Sort Game</h1>
 
-<!-- NAME INPUT SCREEN -->
+<!-- NAME SCREEN -->
 <div id="nameScreen">
- <h2>Enter your name / તમારું નામ / अपना नाम</h2>
- <input id="playerName" placeholder="Your Name" maxlength="15">
- <br>
- <button id="startBtn">Start Game</button>
+  <h2>Enter your name</h2>
+  <input id="playerName" placeholder="Your Name" maxlength="15">
+  <br>
+  <button id="startBtn">Start Game</button>
 </div>
 
 <!-- GAME SCREEN -->
 <div id="gameScreen" style="display:none;">
- <div class="top">
-  <div class="badge">Score: <span id="score">0</span></div>
-  <div class="badge">Level: <span id="level">1</span></div>
-  <div class="badge">⏱️ <span id="time">10</span>s</div>
- </div>
+  <div class="top">
+    <div class="badge">Score: <span id="score">0</span></div>
+    <div class="badge">Level: <span id="level">1</span></div>
+    <div class="badge">⏱ <span id="time">10</span>s</div>
+  </div>
 
- <p>Tap item → Tap bin</p>
- <div id="item" class="item"></div>
+  <p>Tap item → Tap bin</p>
+  <div id="item" class="item"></div>
 
- <div class="bins">
-  <div class="bin organic" data-type="organic"><span>ORGANIC</span></div>
-  <div class="bin recycle" data-type="recycle"><span>RECYCLE</span></div>
-  <div class="bin hazard" data-type="hazard"><span>HAZARD</span></div>
-  <div class="bin general" data-type="general"><span>GENERAL</span></div>
- </div>
+  <div class="bins">
+    <div class="bin organic" data-type="organic"><span>ORGANIC</span></div>
+    <div class="bin recycle" data-type="recycle"><span>RECYCLE</span></div>
+    <div class="bin hazard" data-type="hazard"><span>HAZARD</span></div>
+    <div class="bin general" data-type="general"><span>GENERAL</span></div>
+  </div>
 
- <div class="msg" id="msg"></div>
- <button id="restart" style="display:none;">Restart Game</button>
- <button id="pdf" style="display:none;">Download Certificate (PDF)</button>
+  <div class="msg" id="msg"></div>
+
+  <button id="restart" style="display:none;">Restart</button>
+  <button id="pdf" style="display:none;">Download Certificate</button>
 </div>
 
 <h3>🏆 Leaderboard</h3>
@@ -145,44 +168,44 @@ th,td{padding:8px;border-bottom:1px solid #ffffff30;text-align:center;}
 </thead>
 <tbody id="board"></tbody>
 </table>
+
 </div>
 
 <script>
-/* ---------- VARIABLES ---------- */
+/* ---------- DATA ---------- */
 let items=[
- {e:'🍎',t:'organic'},{e:'🍌',t:'organic'},{e:'🥬',t:'organic'},{e:'🍞',t:'organic'},{e:'🍉',t:'organic'},
- {e:'🧴',t:'recycle'},{e:'📰',t:'recycle'},{e:'📦',t:'recycle'},{e:'🥫',t:'recycle'},{e:'🍾',t:'recycle'},
- {e:'🔋',t:'hazard'},{e:'💡',t:'hazard'},{e:'🧪',t:'hazard'},{e:'💊',t:'hazard'},
- {e:'🥤',t:'general'},{e:'🚬',t:'general'},{e:'🍕',t:'general'},{e:'🧻',t:'general'}
+ {e:'🍎',t:'organic'},{e:'🍌',t:'organic'},{e:'🥬',t:'organic'},
+ {e:'🧴',t:'recycle'},{e:'📰',t:'recycle'},{e:'📦',t:'recycle'},
+ {e:'🔋',t:'hazard'},{e:'💡',t:'hazard'},
+ {e:'🥤',t:'general'},{e:'🚬',t:'general'}
 ];
-let index=0,score=0,level=1,time=10,selected=false,timer;
-let playerName="";
+
+let index=0,score=0,level=1,time=10,selected=false,timer,playerName="";
 
 /* ---------- ELEMENTS ---------- */
 const nameScreen=document.getElementById("nameScreen");
 const gameScreen=document.getElementById("gameScreen");
-const startBtn=document.getElementById("startBtn");
-const nameInput=document.getElementById("playerName");
 const item=document.getElementById("item");
 const scoreEl=document.getElementById("score");
 const levelEl=document.getElementById("level");
 const timeEl=document.getElementById("time");
 const msg=document.getElementById("msg");
-const restart=document.getElementById("restart");
-const pdfBtn=document.getElementById("pdf");
 const board=document.getElementById("board");
 
 /* ---------- FUNCTIONS ---------- */
-function shuffle(a){for(let i=a.length-1;i>0;i--){let j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]];}}
+function shuffle(a){
+ for(let i=a.length-1;i>0;i--){
+  let j=Math.floor(Math.random()*(i+1));
+  [a[i],a[j]]=[a[j],a[i]];
+ }
+}
 shuffle(items);
 
-function levelTime(){return Math.max(10-(level-1)*2,4);}
-
 function startGame(){
+ playerName=document.getElementById("playerName").value||"Player";
  nameScreen.style.display="none";
  gameScreen.style.display="block";
- playerName=nameInput.value||"Player";
- index=0; score=0; level=1;
+ index=0;score=0;level=1;
  scoreEl.textContent=score;
  levelEl.textContent=level;
  nextItem();
@@ -191,17 +214,17 @@ function startGame(){
 function nextItem(){
  item.textContent=items[index].e;
  item.dataset.type=items[index].t;
- time=levelTime();
+ time=10;
  timeEl.textContent=time;
  clearInterval(timer);
  timer=setInterval(()=>{
   time--;
   timeEl.textContent=time;
-  if(time<=0) gameOver();
+  if(time<=0) endGame();
  },1000);
 }
 
-item.onclick=()=>{selected=!selected; item.classList.toggle("active");};
+item.onclick=()=>{selected=true;item.classList.add("active");};
 
 document.querySelectorAll(".bin").forEach(bin=>{
  bin.onclick=()=>{
@@ -215,66 +238,59 @@ document.querySelectorAll(".bin").forEach(bin=>{
    msg.textContent="✅ Correct!";
    index++;
    if(index<items.length) nextItem();
-   else winGame();
+   else endGame();
   }else{
    msg.textContent="❌ Wrong bin!";
+   endGame();
   }
-  selected=false; item.classList.remove("active");
+  selected=false;
+  item.classList.remove("active");
  };
 });
 
-function gameOver(){
+function endGame(){
  clearInterval(timer);
- msg.textContent="⛔ Game Over!";
- finishGame();
-}
-
-function winGame(){
- clearInterval(timer);
- msg.textContent="🏆 Game Complete!";
- finishGame();
-}
-
-function finishGame(){
  item.style.display="none";
- restart.style.display="inline-block";
- pdfBtn.style.display="inline-block";
+ document.getElementById("restart").style.display="inline-block";
+ document.getElementById("pdf").style.display="inline-block";
  saveScore();
  loadBoard();
 }
 
-/* ---------- Leaderboard ---------- */
+/* ---------- LEADERBOARD ---------- */
 function saveScore(){
- const data=JSON.parse(localStorage.getItem("ecoBoard")||"[]");
+ let data=JSON.parse(localStorage.getItem("ecoBoard")||"[]");
  data.push({name:playerName,score,level,date:new Date().toLocaleDateString()});
  data.sort((a,b)=>b.score-a.score);
  localStorage.setItem("ecoBoard",JSON.stringify(data.slice(0,5)));
 }
+
 function loadBoard(){
  board.innerHTML="";
- const data=JSON.parse(localStorage.getItem("ecoBoard")||"[]");
- data.forEach((d,i)=>board.innerHTML+=`<tr><td>${i+1}</td><td>${d.name}</td><td>${d.score}</td><td>${d.level}</td><td>${d.date}</td></tr>`);
+ let data=JSON.parse(localStorage.getItem("ecoBoard")||"[]");
+ data.forEach((d,i)=>{
+  board.innerHTML+=`<tr><td>${i+1}</td><td>${d.name}</td><td>${d.score}</td><td>${d.level}</td><td>${d.date}</td></tr>`;
+ });
 }
 
-/* ---------- PDF Certificate ---------- */
-pdfBtn.onclick=()=>{
+/* ---------- CERTIFICATE ---------- */
+document.getElementById("pdf").onclick=()=>{
  const { jsPDF } = window.jspdf;
- const doc=new jsPDF();
- doc.setFontSize(22);
- doc.text("Solid Waste – Eco Sort Game Certificate",20,40);
- doc.setFontSize(16);
- doc.text(`Name: ${playerName}`,20,60);
- doc.text(`Score: ${score}`,20,75);
- doc.text(`Level: ${level}`,20,90);
- doc.text(`Date: ${new Date().toLocaleDateString()}`,20,105);
- doc.text("Congratulations! 🎉",20,125);
- doc.save("Eco-Sort-Certificate.pdf");
-}
+ const doc=new jsPDF("landscape");
+ const img=new Image();
+ img.src="certificate.png";
+ img.onload=()=>{
+  doc.addImage(img,"PNG",0,0,297,210);
+  doc.setFontSize(28);
+  doc.text(playerName,148,95,{align:"center"});
+  doc.setFontSize(14);
+  doc.text(`Score: ${score}   Level: ${level}`,148,135,{align:"center"});
+  doc.save("Certificate.pdf");
+ };
+};
 
-/* ---------- START BUTTON ---------- */
-startBtn.onclick=startGame;
-restart.onclick=()=>location.reload();
-
+document.getElementById("startBtn").onclick=startGame;
+document.getElementById("restart").onclick=()=>location.reload();
 loadBoard();
 </script>
 </body>
