@@ -1,297 +1,1021 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Solid Waste – Eco Sort Game</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Solid Waste Management | Eco Sort</title>
+    <meta name="description" content="Learn about waste management and play the Eco Sort Challenge.">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+      /* ---------- CSS VARIABLES ---------- */
+:root {
+    --bg-dark: #020617;
+    --bg-gradient: linear-gradient(135deg, #0f172a 0%, #020617 100%);
+    --glass-bg: rgba(255, 255, 255, 0.05);
+    --glass-border: rgba(255, 255, 255, 0.1);
+    --glass-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+    --text-main: #f8fafc;
+    --text-muted: #94a3b8;
+    
+    /* Waste Colors */
+    --color-organic: #22c55e;
+    --color-recycle: #3b82f6;
+    --color-hazard: #ef4444;
+    --color-general: #64748b;
+    --color-gold: #ffd700;
 
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-
-<style>
-/* ---------- GLOBAL ---------- */
-body{
-  margin:0;
-  font-family:Segoe UI, sans-serif;
-  background:#020617;
-  color:#fff;
-  min-height:100vh;
-  padding:15px;
-  overflow-y:auto; /* ✅ SCROLL FIX */
-}
-
-.app{
-  width:100%;
-  max-width:1000px;
-  margin:auto;
-  background:rgba(255,255,255,.08);
-  backdrop-filter:blur(14px);
-  border-radius:22px;
-  padding:20px;
-  text-align:center;
-}
-
-/* ---------- UI ---------- */
-h1,h2{margin-bottom:12px;}
-input,button{
-  padding:10px 25px;
-  border:none;
-  border-radius:30px;
-  font-weight:bold;
-  margin-top:10px;
-}
-button{background:#22c55e;color:#020617;cursor:pointer;}
-input{text-align:center;width:80%;max-width:300px;}
-
-.top{
-  display:flex;
-  gap:10px;
-  justify-content:space-between;
-  flex-wrap:wrap;
-  margin-bottom:10px;
-}
-.badge{
-  background:#00000070;
-  padding:8px 18px;
-  border-radius:30px;
-  border:1px solid #22c55e;
-  font-weight:600;
+    /* Transitions */
+    --transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
 }
 
-/* ---------- ITEM ---------- */
-.item{
-  margin:20px auto;
-  width:120px;
-  height:120px;
-  border-radius:50%;
-  background:radial-gradient(circle,#ffffff30,#00000070);
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  font-size:65px;
-  cursor:pointer;
-}
-.item.active{box-shadow:0 0 25px #22c55e;}
-
-/* ---------- BINS ---------- */
-.bins{
-  display:grid;
-  grid-template-columns:repeat(2,1fr);
-  gap:15px;
-}
-@media(min-width:600px){
-  .bins{grid-template-columns:repeat(4,1fr);}
-}
-.bin{
-  height:130px;
-  border-radius:14px;
-  display:flex;
-  align-items:flex-end;
-  justify-content:center;
-  font-weight:bold;
-  cursor:pointer;
-}
-.bin span{
-  width:100%;
-  background:#00000070;
-  padding:6px;
-  border-radius:0 0 14px 14px;
+/* ---------- RESET & GLOBAL ---------- */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: 'Poppins', sans-serif;
 }
 
-.organic{background:linear-gradient(#22c55e,#14532d);}
-.recycle{background:linear-gradient(#3b82f6,#1e3a8a);}
-.hazard{background:linear-gradient(#ef4444,#7f1d1d);}
-.general{background:linear-gradient(#9ca3af,#374151);}
+body {
+    background: var(--bg-gradient);
+    color: var(--text-main);
+    min-height: 100vh;
+    overflow-x: hidden;
+}
 
-.msg{margin:10px;font-weight:bold;}
+/* Custom Scrollbar */
+::-webkit-scrollbar {
+    width: 10px;
+}
+::-webkit-scrollbar-track {
+    background: var(--bg-dark);
+}
+::-webkit-scrollbar-thumb {
+    background: var(--color-recycle);
+    border-radius: 5px;
+}
 
-/* ---------- LEADERBOARD ---------- */
-table{
-  width:100%;
-  margin-top:15px;
-  border-collapse:collapse;
-  display:block;
-  max-height:280px; /* ✅ mobile scroll */
-  overflow-y:auto;
+/* ---------- TYPOGRAPHY ---------- */
+h1, h2, h3, h4 { color: #ffffff; }
+p { color: var(--text-muted); line-height: 1.6; }
+
+/* ---------- UTILITIES & GLASSMORPHISM ---------- */
+.glass-panel {
+    background: var(--glass-bg);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border: 1px solid var(--glass-border);
+    border-radius: 1.5rem;
+    padding: 2rem;
+    box-shadow: var(--glass-shadow);
 }
-thead,tbody{
-  display:table;
-  width:100%;
+
+.section {
+    padding: 5rem 2rem;
+    max-width: 1200px;
+    margin: 0 auto;
 }
-th,td{
-  padding:8px;
-  border-bottom:1px solid #ffffff30;
+
+.section-header {
+    text-align: center;
+    margin-bottom: 3rem;
 }
-</style>
+.section-header h2 {
+    font-size: 2.5rem;
+    margin-bottom: 0.5rem;
+    background: -webkit-linear-gradient(#fff, #94a3b8);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+
+.btn {
+    padding: 0.8rem 1.5rem;
+    border-radius: 2rem;
+    border: none;
+    font-weight: 600;
+    font-size: 1rem;
+    cursor: pointer;
+    transition: var(--transition);
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    text-decoration: none;
+}
+.primary-btn {
+    background: var(--color-organic);
+    color: var(--bg-dark);
+}
+.primary-btn:hover {
+    background: #16a34a;
+    transform: translateY(-3px);
+    box-shadow: 0 10px 20px rgba(34, 197, 94, 0.3);
+}
+.secondary-btn {
+    background: transparent;
+    color: var(--text-main);
+    border: 1px solid var(--text-main);
+}
+.secondary-btn:hover {
+    background: var(--text-main);
+    color: var(--bg-dark);
+}
+
+.hidden { display: none !important; }
+
+/* ---------- LOADER ---------- */
+.loader-container {
+    position: fixed;
+    top: 0; left: 0; width: 100%; height: 100%;
+    background: var(--bg-dark);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    z-index: 9999;
+    transition: opacity 0.5s ease;
+}
+.spinner {
+    width: 50px; height: 50px;
+    border: 5px solid var(--glass-border);
+    border-top-color: var(--color-organic);
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+    margin-bottom: 1rem;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+
+/* ---------- NAVIGATION ---------- */
+.glass-nav {
+    position: fixed;
+    top: 0; width: 100%;
+    background: rgba(2, 6, 23, 0.8);
+    backdrop-filter: blur(10px);
+    border-bottom: 1px solid var(--glass-border);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1rem 2rem;
+    z-index: 1000;
+}
+.logo { font-size: 1.5rem; font-weight: 800; color: var(--color-organic); }
+.nav-links { list-style: none; display: flex; gap: 2rem; }
+.nav-links a { text-decoration: none; color: var(--text-main); font-weight: 600; transition: var(--transition); }
+.nav-links a:hover { color: var(--color-organic); }
+
+/* ---------- HERO ---------- */
+.hero-section {
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    text-align: center;
+    padding-top: 5rem;
+}
+.hero-content h1 {
+    font-size: 4rem;
+    margin-bottom: 1rem;
+    letter-spacing: -1px;
+}
+.hero-content p {
+    font-size: 1.2rem;
+    max-width: 600px;
+    margin: 0 auto 2rem auto;
+}
+
+/* ---------- ABOUT CARDS ---------- */
+.grid-cards {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 2rem;
+}
+.glass-card {
+    background: var(--glass-bg);
+    border: 1px solid var(--glass-border);
+    border-radius: 1rem;
+    padding: 2rem;
+    text-align: center;
+    transition: var(--transition);
+}
+.glass-card:hover { transform: translateY(-10px); }
+.glass-card .icon { font-size: 3rem; margin-bottom: 1rem; }
+.organic-card .icon { color: var(--color-organic); }
+.recycle-card .icon { color: var(--color-recycle); }
+.hazard-card .icon { color: var(--color-hazard); }
+.general-card .icon { color: var(--color-general); }
+
+/* ---------- STATISTICS ---------- */
+.stats-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 2rem;
+    text-align: center;
+}
+.glass-stat {
+    background: var(--glass-bg);
+    padding: 2rem;
+    border-radius: 1rem;
+    border: 1px solid var(--glass-border);
+}
+.glass-stat i { font-size: 2.5rem; color: var(--color-recycle); margin-bottom: 1rem; }
+.glass-stat h3 { font-size: 3rem; margin-bottom: 0.5rem; font-weight: 800; }
+
+/* ---------- GAME AREA ---------- */
+.game-container { text-align: center; }
+.glass-input {
+    padding: 0.8rem 1.5rem;
+    border-radius: 2rem;
+    border: 1px solid var(--glass-border);
+    background: rgba(0,0,0,0.2);
+    color: #fff;
+    font-size: 1rem;
+    margin-right: 1rem;
+    outline: none;
+}
+.game-hud {
+    display: flex;
+    justify-content: space-around;
+    background: rgba(0,0,0,0.3);
+    padding: 1rem;
+    border-radius: 1rem;
+    margin-bottom: 2rem;
+    font-weight: bold;
+    font-size: 1.2rem;
+}
+.spawner-area {
+    height: 150px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 2rem;
+}
+.waste-item {
+    width: 100px;
+    height: 100px;
+    background: radial-gradient(circle, #334155, #0f172a);
+    border-radius: 50%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    cursor: grab;
+    box-shadow: 0 0 20px rgba(255,255,255,0.1);
+    animation: float 3s ease-in-out infinite;
+    user-select: none;
+}
+.waste-item:active { cursor: grabbing; }
+.waste-item i { font-size: 2.5rem; margin-bottom: 0.2rem; }
+.waste-item span { font-size: 0.7rem; }
+@keyframes float {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-10px); }
+}
+
+.bins-container {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 1rem;
+}
+.bin {
+    height: 150px;
+    border-radius: 1rem;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    border: 2px dashed rgba(255,255,255,0.3);
+    transition: var(--transition);
+}
+.bin i { font-size: 3rem; margin-bottom: 0.5rem; }
+.bin.drag-over { transform: scale(1.05); border-style: solid; box-shadow: inset 0 0 20px rgba(255,255,255,0.2); }
+
+.organic-bin { background: linear-gradient(to top, rgba(34, 197, 94, 0.2), transparent); border-color: var(--color-organic); color: var(--color-organic); }
+.recycle-bin { background: linear-gradient(to top, rgba(59, 130, 246, 0.2), transparent); border-color: var(--color-recycle); color: var(--color-recycle); }
+.hazard-bin { background: linear-gradient(to top, rgba(239, 68, 68, 0.2), transparent); border-color: var(--color-hazard); color: var(--color-hazard); }
+.general-bin { background: linear-gradient(to top, rgba(100, 116, 139, 0.2), transparent); border-color: var(--color-general); color: var(--color-general); }
+
+/* ---------- LEADERBOARD & ACHIEVEMENTS ---------- */
+.grid-2col {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 2rem;
+}
+.leaderboard-table {
+    width: 100%;
+    border-collapse: collapse;
+}
+.leaderboard-table th, .leaderboard-table td {
+    padding: 1rem;
+    text-align: left;
+    border-bottom: 1px solid var(--glass-border);
+}
+.leaderboard-table th { color: var(--color-organic); }
+
+.achievement-list { display: flex; flex-direction: column; gap: 1.5rem; }
+.achievement-item {
+    display: flex;
+    align-items: center;
+    gap: 1.5rem;
+    padding: 1rem;
+    background: rgba(0,0,0,0.2);
+    border-radius: 1rem;
+}
+.achievement-item i { font-size: 2.5rem; }
+
+/* ---------- CERTIFICATE CANVAS ---------- */
+.cert-panel { text-align: center; }
+canvas {
+    max-width: 100%;
+    height: auto;
+    border-radius: 10px;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+    margin: 1.5rem 0;
+    background: #fff; /* Fallback */
+}
+
+/* ---------- MISC ---------- */
+.impact-cards { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1.5rem; }
+.tech-stack { display: flex; gap: 1rem; justify-content: center; flex-wrap: wrap; margin-top: 1.5rem;}
+.tech-tag { padding: 0.5rem 1rem; background: rgba(255,255,255,0.1); border-radius: 20px; font-size: 0.9rem; }
+.glass-footer { text-align: center; padding: 2rem; border-top: 1px solid var(--glass-border); margin-top: 4rem;}
+.social-links { font-size: 1.5rem; margin-bottom: 1rem; }
+.social-links a { color: var(--text-main); margin: 0 10px; transition: var(--transition); }
+.social-links a:hover { color: var(--color-organic); }
+
+/* ---------- RESPONSIVE ---------- */
+@media (max-width: 768px) {
+    .nav-links { display: none; } /* Simplified mobile nav for brevity */
+    .hero-content h1 { font-size: 2.5rem; }
+    .bins-container { grid-template-columns: repeat(2, 1fr); gap: 1rem; }
+    .grid-2col { grid-template-columns: 1fr; }
+    .impact-cards { grid-template-columns: 1fr; }
+    .game-hud { flex-wrap: wrap; gap: 10px; }
+    .glass-input { margin-bottom: 1rem; width: 100%; margin-right: 0; }
+}
+
+/* Scroll Animations */
+.animate-on-scroll { opacity: 0; transform: translateY(30px); transition: opacity 0.6s ease-out, transform 0.6s ease-out; }
+.animate-on-scroll.visible { opacity: 1; transform: translateY(0); }
+    </style>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 </head>
-
 <body>
-<div class="app">
+    <div id="loader" class="loader-container">
+        <div class="spinner"></div>
+        <h2>Loading Environment...</h2>
+    </div>
 
-<h1>Solid Waste – Eco Sort Game</h1>
+    <nav class="glass-nav">
+        <div class="logo">
+            <i class="fa-solid fa-earth-americas"></i> EcoSort
+        </div>
+        <ul class="nav-links">
+            <li><a href="#hero">Home</a></li>
+            <li><a href="#about">About</a></li>
+            <li><a href="#statistics">Stats</a></li>
+            <li><a href="#game">Play</a></li>
+            <li><a href="#leaderboard">Leaderboard</a></li>
+        </ul>
+    </nav>
 
-<!-- NAME SCREEN -->
-<div id="nameScreen">
-  <h2>Enter your name</h2>
-  <input id="playerName" placeholder="Your Name" maxlength="15">
-  <br>
-  <button id="startBtn">Start Game</button>
-</div>
+    <header id="hero" class="section hero-section animate-on-scroll">
+        <div class="hero-content glass-panel">
+            <h1>Solid Waste Management</h1>
+            <p>Empowering sustainable futures through intelligent waste disposal and recycling awareness. Join the movement.</p>
+            <a href="#game" class="btn primary-btn"><i class="fa-solid fa-play"></i> Play Eco Sort Challenge</a>
+        </div>
+        <div class="animated-bg"></div>
+    </header>
 
-<!-- GAME SCREEN -->
-<div id="gameScreen" style="display:none;">
-  <div class="top">
-    <div class="badge">Score: <span id="score">0</span></div>
-    <div class="badge">Level: <span id="level">1</span></div>
-    <div class="badge">⏱ <span id="time">10</span>s</div>
-  </div>
+    <section id="about" class="section animate-on-scroll">
+        <div class="section-header">
+            <h2>Understanding Waste</h2>
+            <p>Proper sorting is the first step towards a cleaner planet.</p>
+        </div>
+        <div class="grid-cards">
+            <div class="glass-card organic-card">
+                <i class="fa-solid fa-leaf icon"></i>
+                <h3>Organic Waste</h3>
+                <p>Biodegradable materials like food scraps and yard waste. Converts into nutrient-rich compost.</p>
+            </div>
+            <div class="glass-card recycle-card">
+                <i class="fa-solid fa-recycle icon"></i>
+                <h3>Recyclable</h3>
+                <p>Materials like paper, glass, and clean plastics that can be processed into new products.</p>
+            </div>
+            <div class="glass-card hazard-card">
+                <i class="fa-solid fa-triangle-exclamation icon"></i>
+                <h3>Hazardous</h3>
+                <p>Toxic, flammable, or corrosive waste. Includes batteries, chemicals, and medical waste.</p>
+            </div>
+            <div class="glass-card general-card">
+                <i class="fa-solid fa-trash-can icon"></i>
+                <h3>General Waste</h3>
+                <p>Non-recyclable, non-hazardous waste destined for landfills. We must minimize this!</p>
+            </div>
+        </div>
+    </section>
 
-  <p>Tap item → Tap bin</p>
-  <div id="item" class="item"></div>
+    <section id="statistics" class="section animate-on-scroll">
+        <div class="section-header">
+            <h2>Global Impact Dashboard</h2>
+        </div>
+        <div class="stats-grid">
+            <div class="glass-stat">
+                <i class="fa-solid fa-dumpster"></i>
+                <h3 class="counter" data-target="2120">0</h3>
+                <p>Million Tons Generated Yearly</p>
+            </div>
+            <div class="glass-stat">
+                <i class="fa-solid fa-recycle"></i>
+                <h3 class="counter" data-target="19">0</h3>
+                <p>Global Recycling Rate (%)</p>
+            </div>
+            <div class="glass-stat">
+                <i class="fa-solid fa-tree"></i>
+                <h3 class="counter" data-target="450">0</h3>
+                <p>Years for Plastic to Decompose</p>
+            </div>
+        </div>
+    </section>
 
-  <div class="bins">
-    <div class="bin organic" data-type="organic"><span>ORGANIC</span></div>
-    <div class="bin recycle" data-type="recycle"><span>RECYCLE</span></div>
-    <div class="bin hazard" data-type="hazard"><span>HAZARD</span></div>
-    <div class="bin general" data-type="general"><span>GENERAL</span></div>
-  </div>
+    <section id="game" class="section animate-on-scroll">
+        <div class="section-header">
+            <h2>Eco Sort Challenge</h2>
+            <p>Drag and drop the waste into the correct bins. Earn points and combos!</p>
+        </div>
+        
+        <div class="game-container glass-panel">
+            <div id="game-setup">
+                <input type="text" id="player-name" placeholder="Enter Your Name" maxlength="20" class="glass-input">
+                <button id="start-game-btn" class="btn primary-btn">Start Challenge</button>
+            </div>
 
-  <div class="msg" id="msg"></div>
+            <div id="game-board" class="hidden">
+                <div class="game-hud">
+                    <div class="hud-item"><i class="fa-solid fa-star"></i> Score: <span id="score">0</span></div>
+                    <div class="hud-item"><i class="fa-solid fa-layer-group"></i> Level: <span id="level">1</span></div>
+                    <div class="hud-item"><i class="fa-solid fa-fire"></i> Combo: <span id="combo">x1</span></div>
+                    <div class="hud-item"><i class="fa-solid fa-stopwatch"></i> <span id="timer">30</span>s</div>
+                </div>
 
-  <button id="restart" style="display:none;">Restart</button>
-  <button id="pdf" style="display:none;">Download Certificate</button>
-</div>
+                <div class="spawner-area">
+                    <div id="waste-item" draggable="true" class="waste-item hidden">
+                        <i id="waste-icon" class="fa-solid fa-question"></i>
+                        <span id="waste-name">Item</span>
+                    </div>
+                </div>
 
-<h3>🏆 Leaderboard</h3>
-<table>
-<thead>
-<tr><th>#</th><th>Name</th><th>Score</th><th>Level</th><th>Date</th></tr>
-</thead>
-<tbody id="board"></tbody>
-</table>
+                <div class="bins-container">
+                    <div class="bin organic-bin" data-type="organic">
+                        <i class="fa-solid fa-leaf"></i>
+                        <span>Organic</span>
+                    </div>
+                    <div class="bin recycle-bin" data-type="recycle">
+                        <i class="fa-solid fa-recycle"></i>
+                        <span>Recycle</span>
+                    </div>
+                    <div class="bin hazard-bin" data-type="hazard">
+                        <i class="fa-solid fa-triangle-exclamation"></i>
+                        <span>Hazardous</span>
+                    </div>
+                    <div class="bin general-bin" data-type="general">
+                        <i class="fa-solid fa-trash-can"></i>
+                        <span>General</span>
+                    </div>
+                </div>
+            </div>
 
-</div>
+            <div id="game-over" class="hidden">
+                <h3>Game Over!</h3>
+                <p>Final Score: <span id="final-score">0</span></p>
+                <div class="game-over-actions">
+                    <button id="restart-btn" class="btn secondary-btn"><i class="fa-solid fa-rotate-right"></i> Play Again</button>
+                    <button id="generate-cert-btn" class="btn primary-btn"><i class="fa-solid fa-award"></i> Generate Certificate</button>
+                </div>
+            </div>
+        </div>
+    </section>
 
-<script>
-/* ---------- DATA ---------- */
-let items=[
- {e:'🍎',t:'organic'},{e:'🍌',t:'organic'},{e:'🥬',t:'organic'},
- {e:'🧴',t:'recycle'},{e:'📰',t:'recycle'},{e:'📦',t:'recycle'},
- {e:'🔋',t:'hazard'},{e:'💡',t:'hazard'},
- {e:'🥤',t:'general'},{e:'🚬',t:'general'}
-];
+    <section id="leaderboard" class="section animate-on-scroll">
+        <div class="grid-2col">
+            <div class="glass-panel">
+                <div class="section-header">
+                    <h2><i class="fa-solid fa-trophy"></i> Leaderboard</h2>
+                </div>
+                <table class="leaderboard-table">
+                    <thead>
+                        <tr>
+                            <th>Rank</th>
+                            <th>Player</th>
+                            <th>Score</th>
+                            <th>Level</th>
+                        </tr>
+                    </thead>
+                    <tbody id="leaderboard-body">
+                        </tbody>
+                </table>
+            </div>
+            
+            <div class="glass-panel achievements">
+                <div class="section-header">
+                    <h2><i class="fa-solid fa-medal"></i> Achievements</h2>
+                </div>
+                <div class="achievement-list">
+                    <div class="achievement-item">
+                        <i class="fa-solid fa-medal" style="color: #ffd700;"></i>
+                        <div>
+                            <h4>Gold Card</h4>
+                            <p>Score over 500 points</p>
+                        </div>
+                    </div>
+                    <div class="achievement-item">
+                        <i class="fa-solid fa-medal" style="color: #c0c0c0;"></i>
+                        <div>
+                            <h4>Silver Card</h4>
+                            <p>Reach Level 5</p>
+                        </div>
+                    </div>
+                    <div class="achievement-item">
+                        <i class="fa-solid fa-medal" style="color: #cd7f32;"></i>
+                        <div>
+                            <h4>Bronze Card</h4>
+                            <p>Play your first game</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
 
-let index=0,score=0,level=1,time=10,selected=false,timer,playerName="";
+    <section id="certificate" class="section hidden">
+        <div class="glass-panel cert-panel">
+            <h2>Your Certificate is Ready!</h2>
+            <p>We generated this using the Canvas API.</p>
+            <canvas id="certCanvas" width="1000" height="700"></canvas>
+            <br>
+            <button id="download-pdf-btn" class="btn primary-btn"><i class="fa-solid fa-download"></i> Download PDF</button>
+        </div>
+    </section>
 
-/* ---------- ELEMENTS ---------- */
-const nameScreen=document.getElementById("nameScreen");
-const gameScreen=document.getElementById("gameScreen");
-const item=document.getElementById("item");
-const scoreEl=document.getElementById("score");
-const levelEl=document.getElementById("level");
-const timeEl=document.getElementById("time");
-const msg=document.getElementById("msg");
-const board=document.getElementById("board");
+    <section id="education" class="section animate-on-scroll">
+        <div class="section-header">
+            <h2>Environmental Impact</h2>
+        </div>
+        <div class="impact-cards">
+            <div class="glass-panel">
+                <h4><i class="fa-solid fa-bottle-water"></i> You saved: 12 Plastic Bottles</h4>
+                <p>By sorting correctly, you redirect plastic from oceans back into the production cycle.</p>
+            </div>
+            <div class="glass-panel">
+                <h4><i class="fa-solid fa-scale-balanced"></i> 3kg Waste Diverted</h4>
+                <p>Keeping organic waste out of landfills prevents the release of harmful methane gas.</p>
+            </div>
+            <div class="glass-panel">
+                <h4><i class="fa-solid fa-cloud"></i> 0.5kg CO₂ Avoided</h4>
+                <p>Recycling aluminum and glass consumes a fraction of the energy needed to create new materials.</p>
+            </div>
+        </div>
+    </section>
 
-/* ---------- FUNCTIONS ---------- */
-function shuffle(a){
- for(let i=a.length-1;i>0;i--){
-  let j=Math.floor(Math.random()*(i+1));
-  [a[i],a[j]]=[a[j],a[i]];
- }
-}
-shuffle(items);
+    <section id="developer" class="section animate-on-scroll">
+        <div class="glass-panel dev-panel">
+            <h2>Project Information</h2>
+            <p>Developed with pure modern web technologies to showcase interactive environmental education.</p>
+            <div class="tech-stack">
+                <span class="tech-tag"><i class="fa-brands fa-html5"></i> HTML5</span>
+                <span class="tech-tag"><i class="fa-brands fa-css3-alt"></i> CSS3</span>
+                <span class="tech-tag"><i class="fa-brands fa-js"></i> Vanilla JS</span>
+                <span class="tech-tag"><i class="fa-solid fa-pen-nib"></i> Canvas API</span>
+                <span class="tech-tag"><i class="fa-solid fa-file-pdf"></i> jsPDF</span>
+            </div>
+        </div>
+    </section>
 
-function startGame(){
- playerName=document.getElementById("playerName").value||"Player";
- nameScreen.style.display="none";
- gameScreen.style.display="block";
- index=0;score=0;level=1;
- scoreEl.textContent=score;
- levelEl.textContent=level;
- nextItem();
-}
+    <footer class="glass-footer">
+        <div class="social-links">
+            <a href="#"><i class="fa-brands fa-github"></i></a>
+            <a href="#"><i class="fa-brands fa-linkedin"></i></a>
+            <a href="#"><i class="fa-brands fa-twitter"></i></a>
+        </div>
+        <p>&copy; 2026 Solid Waste Management Platform. All rights reserved.</p>
+    </footer>
 
-function nextItem(){
- item.textContent=items[index].e;
- item.dataset.type=items[index].t;
- time=10;
- timeEl.textContent=time;
- clearInterval(timer);
- timer=setInterval(()=>{
-  time--;
-  timeEl.textContent=time;
-  if(time<=0) endGame();
- },1000);
-}
+    <audio id="sound-correct" src="https://assets.mixkit.co/active_storage/sfx/2013/2013-preview.mp3"></audio>
+    <audio id="sound-wrong" src="https://assets.mixkit.co/active_storage/sfx/2955/2955-preview.mp3"></audio>
 
-item.onclick=()=>{selected=true;item.classList.add("active");};
+    <script>
+    document.addEventListener("DOMContentLoaded", () => {
+    
+    // --- 1. Loader & Scroll Animations ---
+    setTimeout(() => {
+        const loader = document.getElementById('loader');
+        loader.style.opacity = '0';
+        setTimeout(() => loader.style.display = 'none', 500);
+    }, 1000);
 
-document.querySelectorAll(".bin").forEach(bin=>{
- bin.onclick=()=>{
-  if(!selected) return;
-  clearInterval(timer);
-  if(bin.dataset.type===item.dataset.type){
-   score+=10;
-   if(score%50===0) level++;
-   scoreEl.textContent=score;
-   levelEl.textContent=level;
-   msg.textContent="✅ Correct!";
-   index++;
-   if(index<items.length) nextItem();
-   else endGame();
-  }else{
-   msg.textContent="❌ Wrong bin!";
-   endGame();
-  }
-  selected=false;
-  item.classList.remove("active");
- };
+    const observer = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+            if(entry.isIntersecting) {
+                entry.target.classList.add('visible');
+                if(entry.target.id === 'statistics') animateCounters();
+            }
+        });
+    }, { threshold: 0.1 });
+
+    document.querySelectorAll('.animate-on-scroll').forEach(el => observer.observe(el));
+
+    // --- 2. Animated Counters ---
+    let countersAnimated = false;
+    function animateCounters() {
+        if(countersAnimated) return;
+        document.querySelectorAll('.counter').forEach(counter => {
+            const target = +counter.getAttribute('data-target');
+            const duration = 2000;
+            const step = target / (duration / 16);
+            let current = 0;
+            
+            const updateCounter = () => {
+                current += step;
+                if(current < target) {
+                    counter.innerText = Math.ceil(current);
+                    requestAnimationFrame(updateCounter);
+                } else {
+                    counter.innerText = target;
+                }
+            };
+            updateCounter();
+        });
+        countersAnimated = true;
+    }
+
+    // --- 3. Game State & Data ---
+    const wasteDatabase = [
+        { name: 'Apple Core', type: 'organic', icon: 'fa-apple-whole', color: '#22c55e' },
+        { name: 'Banana Peel', type: 'organic', icon: 'fa-seedling', color: '#22c55e' },
+        { name: 'Plastic Bottle', type: 'recycle', icon: 'fa-bottle-water', color: '#3b82f6' },
+        { name: 'Cardboard', type: 'recycle', icon: 'fa-box', color: '#3b82f6' },
+        { name: 'Dead Battery', type: 'hazard', icon: 'fa-battery-quarter', color: '#ef4444' },
+        { name: 'Chemicals', type: 'hazard', icon: 'fa-flask', color: '#ef4444' },
+        { name: 'Styrofoam', type: 'general', icon: 'fa-cube', color: '#64748b' },
+        { name: 'Broken Mug', type: 'general', icon: 'fa-mug-hot', color: '#64748b' }
+    ];
+
+    let state = {
+        playerName: '', score: 0, level: 1, combo: 0, time: 30, isPlaying: false, currentItem: null, timerInterval: null,
+        itemsSorted: 0, correctAnswers: 0, wrongAnswers: 0, maxItems: 30
+    };
+
+    // --- DOM Elements for Game ---
+    const dom = {
+        setup: document.getElementById('game-setup'),
+        board: document.getElementById('game-board'),
+        gameOver: document.getElementById('game-over'),
+        score: document.getElementById('score'),
+        level: document.getElementById('level'),
+        combo: document.getElementById('combo'),
+        timer: document.getElementById('timer'),
+        item: document.getElementById('waste-item'),
+        icon: document.getElementById('waste-icon'),
+        name: document.getElementById('waste-name'),
+        bins: document.querySelectorAll('.bin'),
+        sndCorrect: document.getElementById('sound-correct'),
+        sndWrong: document.getElementById('sound-wrong')
+    };
+
+    // --- 4. Game Logic ---
+    document.getElementById('start-game-btn').addEventListener('click', startGame);
+
+    function startGame() {
+        const nameInput = document.getElementById('player-name').value.trim();
+        state.playerName = nameInput || 'Eco Warrior';
+        
+        dom.setup.classList.add('hidden');
+        dom.gameOver.classList.add('hidden');
+        dom.board.classList.remove('hidden');
+        document.getElementById('certificate').classList.add('hidden');
+        
+        // Reset progression
+        state.score = 0; state.level = 1; state.combo = 0; state.time = 30;
+        state.itemsSorted = 0; state.correctAnswers = 0; state.wrongAnswers = 0;
+        
+        // Add Progress Tracker to HUD if missing
+        let progressHUD = document.getElementById('progress-hud');
+        if(!progressHUD) {
+            const hudContainer = document.querySelector('.game-hud');
+            hudContainer.insertAdjacentHTML('beforeend', '<div class="hud-item" id="progress-hud"><i class="fa-solid fa-bars-progress"></i> <span id="progress">0/30</span></div>');
+        }
+
+        updateHUD();
+        state.isPlaying = true;
+        
+        spawnItem();
+        state.timerInterval = setInterval(gameTick, 1000);
+    }
+
+    function gameTick() {
+        state.time--;
+        dom.timer.innerText = state.time;
+        if(state.time <= 0) endGame(false); // Timeout ends game
+    }
+
+    function spawnItem() {
+        const rand = Math.floor(Math.random() * wasteDatabase.length);
+        state.currentItem = wasteDatabase[rand];
+        
+        dom.icon.className = `fa-solid ${state.currentItem.icon}`;
+        dom.icon.style.color = state.currentItem.color;
+        dom.name.innerText = state.currentItem.name;
+        
+        dom.item.classList.remove('hidden');
+        dom.item.style.animation = 'none';
+        dom.item.offsetHeight; 
+        dom.item.style.animation = 'float 3s ease-in-out infinite';
+    }
+
+    function updateHUD() {
+        dom.score.innerText = state.score;
+        dom.level.innerText = state.level;
+        dom.combo.innerText = `x${state.combo}`;
+        dom.timer.innerText = state.time;
+        const progressEl = document.getElementById('progress');
+        if(progressEl) progressEl.innerText = `${state.itemsSorted}/${state.maxItems}`;
+    }
+
+    function handleSort(binType) {
+        if(!state.isPlaying) return;
+
+        state.itemsSorted++;
+
+        if(binType === state.currentItem.type) {
+            // Correct
+            state.correctAnswers++;
+            state.combo++;
+            let points = 10 * state.combo;
+            state.score += points;
+            state.time += 1; // +1s reward
+            dom.sndCorrect.currentTime = 0;
+            dom.sndCorrect.play().catch(e => {}); 
+        } else {
+            // Wrong
+            state.wrongAnswers++;
+            state.combo = 0;
+            state.time -= 2; // -2s penalty
+            dom.sndWrong.currentTime = 0;
+            dom.sndWrong.play().catch(e => {});
+        }
+
+        // Level Progression System (10 Levels max)
+        state.level = Math.min(10, Math.floor(state.itemsSorted / 3) + 1);
+
+        updateHUD();
+        dom.item.classList.add('hidden');
+        
+        // Check game end states
+        if (state.itemsSorted >= state.maxItems) {
+            endGame(true); // Completed all 30
+        } else if (state.time <= 0) {
+            endGame(false); // Out of time
+        } else {
+            setTimeout(spawnItem, 300);
+        }
+    }
+
+    function endGame(completed = false) {
+        state.isPlaying = false;
+        clearInterval(state.timerInterval);
+        dom.board.classList.add('hidden');
+
+        // Accuracy Calculation
+        let accuracy = state.itemsSorted > 0 ? Math.round((state.correctAnswers / state.itemsSorted) * 100) : 0;
+
+        let title = completed ? '🏆 Challenge Completed!' : '⏱️ Time Up!';
+        let certMessage = state.score >= 300
+            ? `<button id="generate-cert-btn" class="btn primary-btn"><i class="fa-solid fa-award"></i> Generate Certificate</button>`
+            : `<p style="color: #ef4444; font-size: 0.9rem; margin-top: 15px;"><i class="fa-solid fa-lock"></i> Score 300+ required to unlock certificate.</p>`;
+
+        // Build Game Over Screen
+        dom.gameOver.innerHTML = `
+            <h3 style="font-size: 2rem; color: ${completed ? 'var(--color-organic)' : 'var(--color-hazard)'}">${title}</h3>
+            <div style="margin: 1.5rem auto; padding: 1rem; background: rgba(0,0,0,0.3); border-radius: 1rem; max-width: 400px; text-align: left; font-size: 1.1rem; line-height: 1.8;">
+                <p><i class="fa-solid fa-star" style="color: var(--color-gold)"></i> <strong>Final Score:</strong> <span style="color: var(--color-organic); font-weight: bold;">${state.score}</span></p>
+                <p><i class="fa-solid fa-layer-group"></i> <strong>Level Reached:</strong> ${state.level}/10</p>
+                <p><i class="fa-solid fa-dumpster"></i> <strong>Waste Sorted:</strong> ${state.itemsSorted}/${state.maxItems}</p>
+                <p><i class="fa-solid fa-bullseye"></i> <strong>Accuracy:</strong> ${accuracy}% <span style="font-size: 0.9rem; color: #94a3b8;">(${state.correctAnswers} Correct, ${state.wrongAnswers} Wrong)</span></p>
+            </div>
+            <div class="game-over-actions">
+                <button id="restart-btn" class="btn secondary-btn"><i class="fa-solid fa-rotate-right"></i> Play Again</button>
+                ${certMessage}
+            </div>
+        `;
+
+        dom.gameOver.classList.remove('hidden');
+
+        // Rebind buttons
+        document.getElementById('restart-btn').addEventListener('click', resetGame);
+        if(state.score >= 300) {
+            document.getElementById('generate-cert-btn').addEventListener('click', generateCertificate);
+        }
+
+        saveScore(accuracy);
+        loadLeaderboard();
+    }
+
+    function resetGame() {
+        dom.gameOver.classList.add('hidden');
+        dom.setup.classList.remove('hidden');
+        document.getElementById('certificate').classList.add('hidden');
+    }
+
+    // --- 5. Drag & Drop API ---
+    dom.item.addEventListener('dragstart', (e) => {
+        e.dataTransfer.setData('text/plain', state.currentItem.type);
+        setTimeout(() => dom.item.style.opacity = '0.5', 0);
+    });
+    dom.item.addEventListener('dragend', () => dom.item.style.opacity = '1');
+
+    dom.bins.forEach(bin => {
+        bin.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            bin.classList.add('drag-over');
+        });
+        bin.addEventListener('dragleave', () => bin.classList.remove('drag-over'));
+        bin.addEventListener('drop', (e) => {
+            e.preventDefault();
+            bin.classList.remove('drag-over');
+            handleSort(bin.getAttribute('data-type'));
+        });
+        // Click fallback
+        bin.addEventListener('click', () => {
+            if(!dom.item.classList.contains('hidden')) {
+                handleSort(bin.getAttribute('data-type'));
+            }
+        });
+    });
+
+    // --- 6. Leaderboard (LocalStorage) ---
+    function saveScore(accuracy) {
+        let board = JSON.parse(localStorage.getItem('ecoLeaderboard')) || [];
+        board.push({ 
+            name: state.playerName, 
+            score: state.score, 
+            level: state.level,
+            accuracy: accuracy,
+            date: new Date().toLocaleDateString()
+        });
+        board.sort((a, b) => b.score - a.score);
+        localStorage.setItem('ecoLeaderboard', JSON.stringify(board.slice(0, 10)));
+    }
+
+    function loadLeaderboard() {
+        let board = JSON.parse(localStorage.getItem('ecoLeaderboard')) || [];
+        const tbody = document.getElementById('leaderboard-body');
+        const thead = document.querySelector('.leaderboard-table thead tr');
+
+        if(thead && thead.children.length === 4) {
+            thead.innerHTML = '<th>Rank</th><th>Player</th><th>Score</th><th>Level</th><th>Accuracy</th><th>Date</th>';
+        }
+
+        tbody.innerHTML = '';
+        board.forEach((entry, index) => {
+            let accDisplay = entry.accuracy !== undefined ? `${entry.accuracy}%` : 'N/A';
+            let dateDisplay = entry.date || new Date().toLocaleDateString();
+            
+            let row = `<tr>
+                <td>${index === 0 ? '🥇' : index === 1 ? '🥈' : index === 2 ? '🥉' : index + 1}</td>
+                <td>${entry.name}</td>
+                <td style="color: var(--color-organic); font-weight: bold;">${entry.score}</td>
+                <td>${entry.level}</td>
+                <td>${accDisplay}</td>
+                <td>${dateDisplay}</td>
+            </tr>`;
+            tbody.innerHTML += row;
+        });
+    }
+    loadLeaderboard(); 
+
+    // --- 7. Dynamic Canvas Certificate Generation ---
+    function generateCertificate() {
+        document.getElementById('certificate').classList.remove('hidden');
+        document.getElementById('certificate').scrollIntoView({ behavior: 'smooth' });
+        
+        const canvas = document.getElementById('certCanvas');
+        const ctx = canvas.getContext('2d');
+        
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        
+        // Background
+        ctx.fillStyle = '#ffffff';
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+        drawCornerBlobs(ctx, canvas.width, canvas.height);
+
+        // Gold Border
+        ctx.strokeStyle = '#ffd700'; 
+        ctx.lineWidth = 6;
+        ctx.strokeRect(50, 50, canvas.width - 100, canvas.height - 100);
+        ctx.lineWidth = 1;
+        ctx.strokeRect(60, 60, canvas.width - 120, canvas.height - 120);
+
+        // Watermark
+        ctx.save();
+        ctx.translate(canvas.width / 2, canvas.height / 2);
+        ctx.rotate(-Math.PI / 6);
+        ctx.font = 'bold 120px Poppins, sans-serif';
+        ctx.fillStyle = 'rgba(0, 0, 0, 0.03)';
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        ctx.fillText('ECO SORT', 0, 0);
+        ctx.restore();
+
+        // Typography 
+        ctx.textAlign = 'center';
+        ctx.font = 'bold 50px Poppins, sans-serif';
+        ctx.fillStyle = '#1e293b';
+        ctx.fillText('CERTIFICATE OF ACHIEVEMENT', canvas.width / 2, 160);
+        
+        ctx.font = 'italic 24px Poppins, sans-serif';
+        ctx.fillStyle = '#475569';
+        ctx.fillText('This certifies that', canvas.width / 2, 230);
+        
+        ctx.font = 'bold 65px Poppins, sans-serif';
+        ctx.fillStyle = '#ef4444'; 
+        ctx.fillText(state.playerName.toUpperCase(), canvas.width / 2, 320);
+        
+        ctx.font = 'italic 24px Poppins, sans-serif';
+        ctx.fillStyle = '#475569';
+        ctx.fillText('has successfully completed the', canvas.width / 2, 400);
+
+        ctx.font = 'bold 36px Poppins, sans-serif';
+        ctx.fillStyle = '#22c55e'; 
+        ctx.fillText('SOLID WASTE ECO SORT CHALLENGE', canvas.width / 2, 460);
+
+        ctx.font = '22px Poppins, sans-serif';
+        ctx.fillStyle = '#1e293b';
+        ctx.fillText(`Score : ${state.score}    |    Level : ${state.level}`, canvas.width / 2, 530);
+
+        // Footer signatures
+        const currentDate = new Date().toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' });
+        ctx.font = '20px Poppins, sans-serif';
+        
+        ctx.fillText(currentDate, 250, 610);
+        ctx.beginPath();
+        ctx.moveTo(150, 620);
+        ctx.lineTo(350, 620);
+        ctx.lineWidth = 1;
+        ctx.strokeStyle = '#94a3b8';
+        ctx.stroke();
+        ctx.fillStyle = '#64748b';
+        ctx.font = 'italic 18px Poppins, sans-serif';
+        ctx.fillText('Date', 250, 640);
+
+        ctx.font = '24px "Brush Script MT", cursive';
+        ctx.fillStyle = '#1e293b';
+        ctx.fillText('EcoSort Admin', 750, 605);
+        ctx.beginPath();
+        ctx.moveTo(650, 620);
+        ctx.lineTo(850, 620);
+        ctx.stroke();
+        ctx.fillStyle = '#64748b';
+        ctx.font = 'italic 18px Poppins, sans-serif';
+        ctx.fillText('Authorized Signature', 750, 640);
+    }
+
+    function drawCornerBlobs(ctx, w, h) {
+        ctx.fillStyle = '#3b82f6';
+        ctx.beginPath(); ctx.arc(0, 0, 200, 0, 2 * Math.PI); ctx.fill();
+        ctx.fillStyle = '#22c55e';
+        ctx.beginPath(); ctx.arc(50, -50, 150, 0, 2 * Math.PI); ctx.fill();
+
+        ctx.fillStyle = '#f97316';
+        ctx.beginPath(); ctx.arc(w, h, 220, 0, 2 * Math.PI); ctx.fill();
+        ctx.fillStyle = '#22c55e';
+        ctx.beginPath(); ctx.arc(w - 60, h + 40, 160, 0, 2 * Math.PI); ctx.fill();
+        
+        ctx.fillStyle = '#ef4444';
+        ctx.beginPath(); ctx.arc(w, 0, 100, 0, 2 * Math.PI); ctx.fill();
+
+        ctx.fillStyle = '#eab308';
+        ctx.beginPath(); ctx.arc(0, h, 120, 0, 2 * Math.PI); ctx.fill();
+    }
+
+    // --- 8. Download PDF ---
+    document.getElementById('download-pdf-btn').addEventListener('click', () => {
+        const canvas = document.getElementById('certCanvas');
+        const imgData = canvas.toDataURL('image/jpeg', 1.0);
+        
+        const { jsPDF } = window.jspdf;
+        const pdf = new jsPDF({
+            orientation: 'landscape',
+            unit: 'px',
+            format: [canvas.width, canvas.height]
+        });
+        
+        pdf.addImage(imgData, 'JPEG', 0, 0, canvas.width, canvas.height);
+        pdf.save(`EcoSort_Certificate_${state.playerName.replace(/\s+/g, '_')}.pdf`);
+    });
 });
-
-function endGame(){
- clearInterval(timer);
- item.style.display="none";
- document.getElementById("restart").style.display="inline-block";
- document.getElementById("pdf").style.display="inline-block";
- saveScore();
- loadBoard();
-}
-
-/* ---------- LEADERBOARD ---------- */
-function saveScore(){
- let data=JSON.parse(localStorage.getItem("ecoBoard")||"[]");
- data.push({name:playerName,score,level,date:new Date().toLocaleDateString()});
- data.sort((a,b)=>b.score-a.score);
- localStorage.setItem("ecoBoard",JSON.stringify(data.slice(0,5)));
-}
-
-function loadBoard(){
- board.innerHTML="";
- let data=JSON.parse(localStorage.getItem("ecoBoard")||"[]");
- data.forEach((d,i)=>{
-  board.innerHTML+=`<tr><td>${i+1}</td><td>${d.name}</td><td>${d.score}</td><td>${d.level}</td><td>${d.date}</td></tr>`;
- });
-}
-
-/* ---------- CERTIFICATE ---------- */
-document.getElementById("pdf").onclick=()=>{
- const { jsPDF } = window.jspdf;
- const doc=new jsPDF("landscape");
- const img=new Image();
- img.src="certificate.png";
- img.onload=()=>{
-  doc.addImage(img,"PNG",0,0,297,210);
-  doc.setFontSize(28);
-  doc.text(playerName,148,95,{align:"center"});
-  doc.setFontSize(14);
-  doc.text(`Score: ${score}   Level: ${level}`,148,135,{align:"center"});
-  doc.save("Certificate.pdf");
- };
-};
-
-document.getElementById("startBtn").onclick=startGame;
-document.getElementById("restart").onclick=()=>location.reload();
-loadBoard();
-</script>
+    </script>
 </body>
 </html>
