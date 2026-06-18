@@ -579,9 +579,8 @@
 
     <audio id="sound-correct" src="https://assets.mixkit.co/active_storage/sfx/2013/2013-preview.mp3" preload="auto"></audio>
     <audio id="sound-wrong" src="https://assets.mixkit.co/active_storage/sfx/2955/2955-preview.mp3" preload="auto"></audio>
-
     <script>
-document.addEventListener("DOMContentLoaded", () => {
+        document.addEventListener("DOMContentLoaded", () => {
     
     // ==========================================================================
     // 0. SECURITY & PERFORMANCE UTILITIES
@@ -612,9 +611,10 @@ document.addEventListener("DOMContentLoaded", () => {
     // 1. SUPABASE INTEGRATION & GLOBAL LEADERBOARD CONFIG
     // ==========================================================================
     
+    // FIX: Updated the Supabase config to the correct provided URL and Key
     const SUPABASE = {
-        url: 'PASTE_MY_URL_HERE',
-        key: 'PASTE_MY_KEY_HERE',
+        url: 'https://sncqptjyeugjjpctuakv.supabase.co',
+        key: 'sb_publishable_fCoI67JnbKsyQO4k-N6jVw_p11aGPiR',
         table: 'leaderboard'
     };
 
@@ -940,8 +940,7 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     async function saveScoreToSupabase(payload) {
-        if(SUPABASE.url === 'https://sncqptjyeugjjpctuakv.supabase.co') return; // Guard if not configured
-        
+        // FIX: Removed the incorrect guard condition that was blocking actual requests
         try {
             const response = await fetch(`${SUPABASE.url}/rest/v1/${SUPABASE.table}`, {
                 method: 'POST',
@@ -953,38 +952,58 @@ document.addEventListener("DOMContentLoaded", () => {
                 },
                 body: JSON.stringify(payload)
             });
-            if(!response.ok) throw new Error('Failed to save to Supabase');
-            syncLocalToCloud(); // Trigger sync of any pending
+            
+            // FIX: Added proper error handling to capture and log Supabase rejections
+            if(!response.ok) {
+                const errText = await response.text();
+                throw new Error(`Failed to save to Supabase: ${response.status} - ${errText}`);
+            }
+            
+            // FIX: Ensure pending offline queues are synced successfully when connection is verified
+            syncLocalToCloud(); 
         } catch (error) {
-            console.warn('Global Save Failed, saving to offline sync queue.', error);
+            console.warn('Global Save Failed, saving to offline sync queue.', error.message);
+            
+            // FIX: Ensure offline queue properly captures data without duplicating exact references
             let queue = JSON.parse(localStorage.getItem('ecoSortSyncQueue')) || [];
-            queue.push(payload);
-            localStorage.setItem('ecoSortSyncQueue', JSON.stringify(queue));
+            const isDuplicate = queue.some(item => item.player_name === payload.player_name && item.score === payload.score && item.created_at === payload.created_at);
+            
+            if (!isDuplicate) {
+                queue.push(payload);
+                localStorage.setItem('ecoSortSyncQueue', JSON.stringify(queue));
+            }
         }
     }
 
     async function loadGlobalLeaderboard() {
-        if(SUPABASE.url === 'PASTE_MY_URL_HERE') return null;
+        // FIX: Removed the invalid guard condition that forced loadGlobalLeaderboard to return null
         try {
             const response = await fetch(`${SUPABASE.url}/rest/v1/${SUPABASE.table}?select=player_name,score,level,accuracy,created_at&order=score.desc&limit=50`, {
                 method: 'GET',
                 headers: {
                     'apikey': SUPABASE.key,
-                    'Authorization': `Bearer ${SUPABASE.key}`
+                    'Authorization': `Bearer ${SUPABASE.key}`,
+                    'Content-Type': 'application/json'
                 }
             });
-            if(!response.ok) throw new Error('Supabase fetch failed');
+            
+            // FIX: Robust error logging for failed fetches
+            if(!response.ok) {
+                const errText = await response.text();
+                throw new Error(`Supabase fetch failed: ${response.status} - ${errText}`);
+            }
+            
             const data = await response.json();
             globalLeaderboardCache = data;
             return data;
         } catch (error) {
-            console.error('Network Error Loading Global Leaderboard:', error);
-            return null; // Fallback handled in render
+            console.error('Network Error Loading Global Leaderboard:', error.message);
+            return null; // Fallback to local handled in render
         }
     }
 
     async function syncLocalToCloud() {
-        if(SUPABASE.url === 'https://sncqptjyeugjjpctuakv.supabase.co') return;
+        // FIX: Removed incorrect guard blocking the offline sync process
         let queue = JSON.parse(localStorage.getItem('ecoSortSyncQueue')) || [];
         if(queue.length === 0) return;
 
@@ -997,13 +1016,19 @@ document.addEventListener("DOMContentLoaded", () => {
                     'Authorization': `Bearer ${SUPABASE.key}`,
                     'Prefer': 'return=minimal'
                 },
-                body: JSON.stringify(queue)
+                body: JSON.stringify(queue) // Sending bulk array
             });
+            
             if(response.ok) {
+                // FIX: Successfully synced, we must clear the offline queue to prevent duplicates
                 localStorage.removeItem('ecoSortSyncQueue');
+                console.log(`Successfully synced ${queue.length} offline scores to Supabase.`);
+            } else {
+                const errText = await response.text();
+                console.warn(`Sync failed: ${response.status} - ${errText}`);
             }
         } catch (err) {
-            console.warn('Sync still failing, will retry later.');
+            console.warn('Sync network error, will retry later.', err.message);
         }
     }
 
@@ -1033,8 +1058,9 @@ document.addEventListener("DOMContentLoaded", () => {
             renderLeaderboard();
         });
         
-        // Remove disabled state if Supabase configured
-        if(SUPABASE.url !== 'https://sncqptjyeugjjpctuakv.supabase.co' && btn.innerText.includes('Global')) {
+        // FIX: Removed broken URL check that kept the Global button permanently disabled.
+        // Button now correctly allows Global Server requests.
+        if(btn.innerText.includes('Global')) {
             btn.classList.remove('disabled');
             btn.title = "View Global Rankings";
         }
@@ -1047,7 +1073,7 @@ document.addEventListener("DOMContentLoaded", () => {
         
         let boardData = [];
         
-        if (currentLeaderboardMode === 'global' && globalLeaderboardCache.length > 0) {
+        if (currentLeaderboardMode === 'global' && globalLeaderboardCache && globalLeaderboardCache.length > 0) {
             boardData = globalLeaderboardCache.map(entry => ({
                 name: entry.player_name,
                 score: entry.score,
@@ -1243,6 +1269,6 @@ document.addEventListener("DOMContentLoaded", () => {
     window.addEventListener('resize', handleCanvasResize);
 
 });
-</script>
+    </script>
 </body>
 </html>
